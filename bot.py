@@ -23,13 +23,13 @@ db = mysql.connector.connect(
   database="responses"
 )
 cursor = db.cursor()
-print(db)
+print("[LOG] Database connection established: "+db)
 # ------------------------------------------------------------------------------
 
 # Bot start
 @bot.event
 async def on_ready():
-    print("Bot has started successfully.")
+    print("[LOG] Bot has started successfully.")
 
 
 # Monitors for reactions and then adds them to a database table accordingly so that the data can be used to re-train the model.
@@ -37,14 +37,14 @@ async def on_ready():
 async def on_reaction_add(reaction, user):
     author = reaction.message.channel.owner
     emoji = reaction.emoji
+    print("[LOG] "+emoji+" was detected")
     if user != author: # Only the author can rate answers
         if user.bot: # Ignore bot reactions
             return
         else:
             await reaction.message.remove_reaction(emoji, user) # Remove reaction if person giving feedback is not the author
+            print("[LOG] Feedback ignored. User was not author of the post.")
     else:
-        emoji = reaction.emoji
-        print(emoji)
         if emoji == '\N{THUMBS UP SIGN}':
             prompt = reaction.message.channel.name
             response = reaction.message.content
@@ -55,6 +55,7 @@ async def on_reaction_add(reaction, user):
             db.commit()
             await reaction.message.clear_reactions() # Clear reactions so that user cannot give double feedback
             await reaction.message.edit(content=response+good_feedback) # Edit message to contain the AI response as well as a message warning that it still may not be correct.
+            print("[LOG] Good feedback received.")        
         if emoji == '\N{THUMBS DOWN SIGN}':
             prompt = reaction.message.channel.name
             response = reaction.message.content
@@ -65,14 +66,15 @@ async def on_reaction_add(reaction, user):
             db.commit()
             await reaction.message.clear_reactions() # Clear reactions so that user cannot give double feedback
             await reaction.message.edit(content=bad_feedback, delete_after=15) # Edit message to remove the bad response as well as a message apologizing. The response will then be deleted.
+            print("[LOG] Bad feedback received.")
     
-# Responds to new forum posts with an answer
+# Responds to new forum posts with an ai-generated answer
 @bot.event
 async def on_thread_create(thread):
     if thread.parent.name == "questions":
         print("[LOG] New question detected")
         await thread.join()
-        question = thread.starting_message.channel.name
+        question = thread.starting_message.channel.name+" "+thread.starting_message.channel.last_message.content # Include post title and message
         answer = ai.ask(question)
         message = await thread.send(answer+warning)
         for emoji in emojis:

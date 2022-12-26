@@ -10,8 +10,8 @@ db = mysql.connector.connect(
 
 cursor = db.cursor()
 
-cursor.execute("CREATE TABLE bad (id INT AUTO_INCREMENT PRIMARY KEY, prompt TEXT(255), completion LONGTEXT)")
-cursor.execute("CREATE TABLE good (id INT AUTO_INCREMENT PRIMARY KEY, prompt TEXT(255), completion LONGTEXT)")
+cursor.execute("CREATE TABLE bad (id INT AUTO_INCREMENT PRIMARY KEY, prompt TEXT(255), completion LONGTEXT, approval boolean not null default 0)")
+cursor.execute("CREATE TABLE good (id INT AUTO_INCREMENT PRIMARY KEY, prompt TEXT(255), completion LONGTEXT, approval boolean not null default 0)")
 
 cursor.execute("SHOW TABLES")
 

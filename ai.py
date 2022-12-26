@@ -10,7 +10,7 @@ session_prompt = "Pretend to be a Chatbot for The Office of Residence Life. Your
 
 def ask(question):
     prompt_text = f'{session_prompt}\n{restart_sequence}: {question}{start_sequence}:' # Adds the session prompt to the question.
-    print("[LOG] Connecting to OpenAI... Prompt:\n"+prompt_text) # Debug purposes
+    print("[LOG] Connecting to OpenAI...")
     response = openai.Completion.create(
       engine="text-davinci-003",
       prompt=prompt_text,
