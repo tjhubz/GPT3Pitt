@@ -1,5 +1,5 @@
 # ---- Base ----
-FROM python-alpine AS base
+FROM python:slim AS base
 ADD util /GPT3Pitt/util
 COPY bot.py /GPT3Pitt/bot.py
 COPY config.json /GPT3Pitt/config.json
