@@ -23,7 +23,7 @@ db = mysql.connector.connect(
   database="responses"
 )
 cursor = db.cursor()
-print("[LOG] Database connection established: "+db)
+print(f'[LOG] Database connection established: {db}')
 # ------------------------------------------------------------------------------
 
 # Bot start
