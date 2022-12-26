@@ -1,5 +1,5 @@
 # ---- Base ----
-FROM python AS base
+FROM python:slim AS base
 COPY bot.py /GPT3Pitt/bot.py
 COPY ai.py /GPT3Pitt/ai.py
 WORKDIR /GPT3Pitt
