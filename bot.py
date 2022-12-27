@@ -3,7 +3,6 @@ import discord
 import discord.ext
 import ai
 import mysql.connector
-import asyncio
 
 # ------------------------------- INITIALIZATION -------------------------------
 bot = discord.Bot(intents=discord.Intents.all())
@@ -23,6 +22,7 @@ db = mysql.connector.connect(
   database="responses"
 )
 cursor = db.cursor()
+
 print(f'[LOG] Database connection established: {db}')
 # ------------------------------------------------------------------------------
 
@@ -37,7 +37,6 @@ async def on_ready():
 async def on_reaction_add(reaction, user):
     author = reaction.message.channel.owner
     emoji = reaction.emoji
-    print("[LOG] "+emoji+" was detected")
     if user != author: # Only the author can rate answers
         if user.bot: # Ignore bot reactions
             return
@@ -46,9 +45,8 @@ async def on_reaction_add(reaction, user):
             print("[LOG] Feedback ignored. User was not author of the post.")
     else:
         if emoji == '\N{THUMBS UP SIGN}':
-            prompt = reaction.message.channel.name
-            response = reaction.message.content
-            response = response.replace(warning,'') # Remove generic warning from the message so that it can be replaced upon message edit
+            prompt = (f'{reaction.message.channel.name} {reaction.message.channel.starting_message.content}')
+            response = reaction.message.content.replace(warning,'') # Remove generic warning from the message so that it can be replaced upon message edit
             sql = "INSERT INTO good (prompt, completion) VALUES (%s, %s)" # Add the example of a good response to the "good" table in the responses database.
             val = (prompt, response)
             cursor.execute(sql, val)
@@ -57,9 +55,8 @@ async def on_reaction_add(reaction, user):
             await reaction.message.edit(content=response+good_feedback) # Edit message to contain the AI response as well as a message warning that it still may not be correct.
             print("[LOG] Good feedback received.")        
         if emoji == '\N{THUMBS DOWN SIGN}':
-            prompt = reaction.message.channel.name
-            response = reaction.message.content
-            response = response.replace(warning,'') # Remove generic warning from the message so that it can be replaced upon message edit
+            prompt = (f'{reaction.message.channel.name} {reaction.message.channel.starting_message.content}')
+            response = reaction.message.content.replace(warning,'') # Remove generic warning from the message so that it can be replaced upon message edit
             sql = "INSERT INTO bad (prompt, completion) VALUES (%s, %s)"
             val = (prompt, response)
             cursor.execute(sql, val)
@@ -74,7 +71,7 @@ async def on_thread_create(thread):
     if thread.parent.name == "questions":
         print("[LOG] New question detected")
         await thread.join()
-        question = thread.starting_message.channel.name+" "+thread.starting_message.channel.last_message.content # Include post title and message
+        question = thread.starting_message.channel.name+" "+thread.starting_message.content # Include post title and message
         answer = ai.ask(question)
         message = await thread.send(answer+warning)
         for emoji in emojis:
