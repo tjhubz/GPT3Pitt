@@ -2,16 +2,11 @@ import os
 import discord
 import discord.ext
 import ai
-import sqlalchemy
-from sqlalchemy import create_engine
+import db
 
 # ------------------------------- INITIALIZATION -------------------------------
 bot = discord.Bot(intents=discord.Intents.all())
 TOKEN = os.getenv("DISCORD_TOKEN")
-
-# Setup MySQL
-engine = create_engine(f'mysql+mysqlconnector://{os.getenv("MYSQL_USER")}:{os.getenv("MYSQL_PASSWORD")}@{os.getenv("MYSQL_IP")}/responses', echo=False)
-db = engine.connect()
 
 # Communication to the user
 warning = "\n\n*NOTICE: I am an AI that is currently being trained. My goal is to provide answers to questions, but please note that they may be incorrect. The author of this post can rate this answer with either a thumbs up or down.*"
@@ -56,7 +51,7 @@ async def on_reaction_add(reaction, user):
             response = reaction.message.content.replace(warning,'') # Remove generic warning from the message so that it can be replaced upon message edit
             sql = "INSERT INTO good (prompt, completion) VALUES (%s, %s)"
             val = (prompt, response)
-            db.execute(sql, val) # Add the example of a good completion to the "good" table in the responses database.
+            db.write(sql, val) # Add the example of a good completion to the "good" table in the responses database.
             await reaction.message.clear_reactions() # Clear reactions so that user cannot give double feedback
             await reaction.message.edit(content=response+good_feedback) # Edit message to contain the AI response as well as a message warning that it still may not be correct.
             print("[LOG] Good feedback received.")        
@@ -65,7 +60,7 @@ async def on_reaction_add(reaction, user):
             response = reaction.message.content.replace(warning,'') # Remove generic warning from the message so that it can be replaced upon message edit
             sql = "INSERT INTO bad (prompt, completion) VALUES (%s, %s)"
             val = (prompt, response)
-            db.execute(sql, val) # Add the example of a bad completion to the "bad" table in the responses database.
+            db.write(sql, val) # Add the example of a bad completion to the "bad" table in the responses database.
             await reaction.message.clear_reactions() # Clear reactions so that user cannot give double feedback
             await reaction.message.edit(content=bad_feedback, delete_after=15) # Edit message to remove the bad response as well as a message apologizing. The response will then be deleted.
             print("[LOG] Bad feedback received.")
