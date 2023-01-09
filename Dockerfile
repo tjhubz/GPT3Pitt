@@ -2,6 +2,7 @@
 FROM python:slim AS base
 COPY bot.py /GPT3Pitt/bot.py
 COPY ai.py /GPT3Pitt/ai.py
+COPY db.py /GPT3Pitt/db.py
 WORKDIR /GPT3Pitt
 
 # ---- Dependencies ----
