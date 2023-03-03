@@ -1,15 +1,13 @@
 # ---- Base ----
-FROM python:slim AS base
-COPY bot.py /GPT3Pitt/bot.py
-COPY ai.py /GPT3Pitt/ai.py
-COPY db.py /GPT3Pitt/db.py
-WORKDIR /GPT3Pitt
+FROM python:3.10-slim-buster AS base
+COPY webhook.py /PittMC/webhook.py
+WORKDIR /PittMC
 
 # ---- Dependencies ----
 FROM base as dependencies
-COPY requirements.txt /GPT3Pitt/requirements.txt
+COPY requirements.txt /PittMC/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # ---- Release ----
 FROM dependencies AS release
-CMD [ "python", "bot.py" ]
+CMD [ "python", "webhook.py" ]
