@@ -11,7 +11,7 @@ node {
         /* This builds the actual image; synonymous to
          * docker build on the command line */
 
-        app = docker.build("tjhubz/PittMC")
+        app = docker.build("tjhubz/gpt3pitt")
     }
 
     if(env.BRANCH_NAME == 'dev'){
